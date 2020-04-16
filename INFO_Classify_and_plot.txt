@@ -1,0 +1,130 @@
+
+################################# INFO #######################################
+
+The .m files needed to classify the peaks and create point clouds 
+using the FGI-HSL:
+
+FUNCTION HIERARCHY
+
+MAIN: 
+Classify_return_type.m
+
+	PREPROCESSING:
+	remove_skipped_pulses.m 
+	Align_and_multiply.m 
+		
+		find_return_peak_locations.m
+		process_for_fitting.m
+			FRD_Gauss.m
+			FRD_Spline.m
+			FRD_Poly.m
+			FRD_LM.m
+
+	PLOTTING: 
+	HSL_pointcloud.m
+
+OVERVIEW:
+A set of function which preprocess the waveform data that has been
+converted from binary to numerical values. The function classifies
+all waveforms according to the number of returns peaks in each waveform
+and constructs a 3D point-cloud. Can be used generally with FGI-HSL
+data.
+
+
+GENERAL NOTES:
+-Theses functions require that arrays holding the waveform data to have
+all the time and amplitude values of each waveform in a row-wise order.
+
+-The angular data of each waveform must be arranged so that one row 
+corresponds to one waveform.
+
+
+MAIN:
+----------------------
+Classify_return_type.m
+---------------------- 
+THIS FUNCTION DOES NOT HAS NOT BEEN IMPLEMENTED TO ITS FINAL FORM YET
+
+This function also calls for all the other functions listed above!
+This function crates an array for the waveform peaks to be plotted
+and plots them. The array stores the waveform depending on the number
+of return peaks in each waveform. So that waveforms with one return
+can be found in one column and waveforms 2 returns in another and so on.
+
+
+PREPROCESSING:
+-----------------------
+remove_skipped_pulses.m
+-----------------------
+This function is used to remove waveforms which do not have corresponding
+angular data (positional data) or vice versa. The function will return
+all the waveforms and their corresponding angular data so that the number
+of rows in each array matches.
+
+This function removes some irrelevant data from the begging and the end
+of each waveform to make the arrays smaller and the processing faster.
+
+Removing pulse recordings which do not have corresponding angular data from
+the electric motor positions can be tricky. The code might need to be changed
+in the future to account for new unforeseen measurement data retrieval 
+discrepancies and thus the code deserves an extended documentation. View this
+file alongside the above mentioned function to understand what is going on.
+
+The data_time parameter holds Linux machine time-stamps for each time the
+the angle of emission is changed. The timeStamp_x parameter holds time-stamps
+for each time a trigger pulse is received by the digitizers. There are more
+angular time-stamps because sometimes the digitization card is not fast enough
+to react.
+
+To remove the extra pulses the difference between a trigger time-stamp (TTS)
+value and angle change time-stamp (ATS). If this difference is larger than 1
+the corresponding location of the ATS in the data_time array is stored in an
+array called i_del.
+
+If the laser shuts down after the last angle has been recorded, there will be 
+extra TTS values which also have to be removed. Since the difference criterion 
+presented above checks the difference a number of times equal to the number of 
+TTS values the function will display an error if there TTS values further in
+time than there are ATS values. This is why the while loop contains a "break"
+command for when difference for all possible ATS values have been calculated.
+The number of extra waveform time stamps is stored in the "rts" parameter and 
+finally the waveforms with no corresponding angular time stamp values are removed.
+
+
+NOTE!
+This function also deletes a the first 42 waveforms due to the current
+data-set being corrupted. This section should be commented out when using
+other data-sets than the one measured in Parainen.
+
+---------------------
+Align_and_multiply.m
+---------------------
+Aligns channels 1-4 and 5-8 separately so that the maxima of triggers are 
+in the same location. Simultaneously checks if some of the waveforms are 
+missing the trigger peak. These waveforms are removed along with their 
+corresponding angular data. 
+
+After the alignment has been completed the corresponding waveforms from
+channels 1-4 and 5-8 are multiplied separately. This allows for the 
+returns to be recognized more easily.
+
+----------------------------
+find_return_peak locations.m
+----------------------------
+This function is called from inside Align_and_multiply.m. The function 
+calculates the slopes from the product of 4 aligned waveforms. A 
+threshold is then used to separate the positions of values that have
+the largest slope, indicating the return pulse locations. An array named
+'ret_pos' is returned
+
+
+
+-------------
+cut_and_fit.m
+-------------
+ 
+
+PLOTTING
+HSL_pointcloud.m
+
+

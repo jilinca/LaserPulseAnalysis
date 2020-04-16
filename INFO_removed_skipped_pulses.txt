@@ -1,0 +1,29 @@
+INFO remove_skipped_pulses.m
+
+This is a separate documentation file for the function remove_skipped_pulses.m
+Removing pulse recordings which do not have corresponding angular data from
+the electric motor positions can be tricky. The code might need to be changed
+in the future to account for new unforeseen measurement data retrieval 
+discrepancies and thus the code deserves an extended documentation. View this
+file alongside the above mentioned function to understand what is going on.
+
+The data_time parameter holds Linux machine time-stamps for each time the
+the angle of emission is changed. The timeStamp_x parameter holds time-stamps
+for each time a trigger pulse is received by the digitizers. There are more
+angular time-stamps because sometimes the digitization card is not fast enough
+to react.
+
+To remove the extra pulses the difference between a trigger time-stamp (TTS)
+value and angle change time-stamp (ATS). If this difference is larger than 1
+the corresponding location of the ATS in the data_time array is stored in an
+array called i_del.
+
+If the laser shuts down after the last angle has been recorded, there will be 
+extra TTS values which also have to be removed. Since the difference criterion 
+presented above checks the difference a number of times equal to the number of 
+TTS values the function will display an error if there TTS values further in
+time than there are ATS values. This is why the while loop contains a "break"
+command for when difference for all possible ATS values have been calculated.
+The number of extra waveform time stamps is stored in the "rts" parameter and 
+finally the waveforms with no corresponding angular time stamp values are removed.
+ 
